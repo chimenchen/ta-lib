@@ -1,4 +1,4 @@
-/* TA-LIB Copyright (c) 1999-2007, Mario Fortier
+/* TA-LIB Copyright (c) 1999-2008, Mario Fortier
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -38,6 +38,34 @@
  * likely the case), just ignore this file.
  */
  
+
+/*
+ * TA_ACCBANDS - Acceleration Bands
+ * 
+ * Input  = High, Low, Close
+ * Output = double, double, double
+ * 
+ * Optional Parameters
+ * -------------------
+ * optInTimePeriod:(From 2 to 100000)
+ *    Number of period
+ * 
+ * 
+ */
+TA_RetCode TA_ACCBANDS( int           START_IDX,
+                        int           END_IDX,
+                        const double *IN_ARRAY /* inHigh */,
+                        const double *IN_ARRAY /* inLow */,
+                        const double *IN_ARRAY /* inClose */,
+                        int           OPT_INT /* optInTimePeriod */, /* From 2 to 100000 */
+                        int          *BEG_IDX,
+                        int          *OUT_SIZE,
+                        double       *OUT_ARRAY /* outRealUpperBand */,
+                        double       *OUT_ARRAY /* outRealMiddleBand */,
+                        double       *OUT_ARRAY /* outRealLowerBand */ );
+
+int TA_ACCBANDS_Lookback( int           optInTimePeriod );  /* From 2 to 100000 */
+
 
 /*
  * TA_ACOS - Vector Trigonometric ACos
@@ -340,6 +368,30 @@ TA_RetCode TA_AVGPRICE( int           START_IDX,
                         double       *OUT_ARRAY /* outReal */ );
 
 int TA_AVGPRICE_Lookback( void );
+
+
+/*
+ * TA_AVGDEV - Average Deviation
+ * 
+ * Input  = double
+ * Output = double
+ * 
+ * Optional Parameters
+ * -------------------
+ * optInTimePeriod:(From 2 to 100000)
+ *    Number of period
+ * 
+ * 
+ */
+TA_RetCode TA_AVGDEV( int           START_IDX,
+                      int           END_IDX,
+                      const double *IN_ARRAY /* inReal */,
+                      int           OPT_INT /* optInTimePeriod */, /* From 2 to 100000 */
+                      int          *BEG_IDX,
+                      int          *OUT_SIZE,
+                      double       *OUT_ARRAY /* outReal */ );
+
+int TA_AVGDEV_Lookback( int           optInTimePeriod );  /* From 2 to 100000 */
 
 
 /*
@@ -2050,6 +2102,31 @@ TA_RetCode TA_HT_TRENDMODE( int           START_IDX,
                             int          *OUT_ARRAY /* outInteger */ );
 
 int TA_HT_TRENDMODE_Lookback( void );
+
+
+/*
+ * TA_IMI - Intraday Momentum Index
+ * 
+ * Input  = Open, Close
+ * Output = double
+ * 
+ * Optional Parameters
+ * -------------------
+ * optInTimePeriod:(From 2 to 100000)
+ *    Number of period
+ * 
+ * 
+ */
+TA_RetCode TA_IMI( int           START_IDX,
+                   int           END_IDX,
+                   const double *IN_ARRAY /* inOpen */,
+                   const double *IN_ARRAY /* inClose */,
+                   int           OPT_INT /* optInTimePeriod */, /* From 2 to 100000 */
+                   int          *BEG_IDX,
+                   int          *OUT_SIZE,
+                   double       *OUT_ARRAY /* outReal */ );
+
+int TA_IMI_Lookback( int           optInTimePeriod );  /* From 2 to 100000 */
 
 
 /*

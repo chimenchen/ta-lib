@@ -228,6 +228,10 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=..\..\..\..\src\ta_func\ta_ACCBANDS.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\..\src\ta_func\ta_ACOS.c
 # End Source File
 # Begin Source File
@@ -277,6 +281,10 @@ SOURCE=..\..\..\..\src\ta_func\ta_ATR.c
 # Begin Source File
 
 SOURCE=..\..\..\..\src\ta_func\ta_AVGPRICE.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\ta_func\ta_AVGDEV.c
 # End Source File
 # Begin Source File
 
@@ -605,6 +613,10 @@ SOURCE=..\..\..\..\src\ta_func\ta_HT_TRENDLINE.c
 # Begin Source File
 
 SOURCE=..\..\..\..\src\ta_func\ta_HT_TRENDMODE.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\src\ta_func\ta_IMI.c
 # End Source File
 # Begin Source File
 

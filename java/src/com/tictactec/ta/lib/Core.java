@@ -1,4 +1,4 @@
-/* TA-LIB Copyright (c) 1999-2007, Mario Fortier
+/* TA-LIB Copyright (c) 1999-2008, Mario Fortier
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or
@@ -189,6 +189,191 @@ public class Core {
    }
    
    /**** START GENCODE SECTION 1 - DO NOT DELETE THIS LINE ****/
+   public int accbandsLookback( int optInTimePeriod )
+   {
+      if( (int)optInTimePeriod == ( Integer.MIN_VALUE ) )
+         optInTimePeriod = 20;
+      else if( ((int)optInTimePeriod < 2) || ((int)optInTimePeriod > 100000) )
+         return -1;
+      return smaLookback ( optInTimePeriod );
+   }
+   public RetCode accbands( int startIdx,
+      int endIdx,
+      double inHigh[],
+      double inLow[],
+      double inClose[],
+      int optInTimePeriod,
+      MInteger outBegIdx,
+      MInteger outNBElement,
+      double outRealUpperBand[],
+      double outRealMiddleBand[],
+      double outRealLowerBand[] )
+   {
+      RetCode retCode;
+      double []tempBuffer1 ;
+      double []tempBuffer2 ;
+      MInteger outBegIdxDummy = new MInteger() ;
+      MInteger outNbElementDummy = new MInteger() ;
+      int i, j, outputSize, bufferSize, lookbackTotal;
+      double tempReal;
+      if( startIdx < 0 )
+         return RetCode.OutOfRangeStartIndex ;
+      if( (endIdx < 0) || (endIdx < startIdx))
+         return RetCode.OutOfRangeEndIndex ;
+      if( (int)optInTimePeriod == ( Integer.MIN_VALUE ) )
+         optInTimePeriod = 20;
+      else if( ((int)optInTimePeriod < 2) || ((int)optInTimePeriod > 100000) )
+         return RetCode.BadParam ;
+      lookbackTotal = smaLookback ( optInTimePeriod );
+      if( startIdx < lookbackTotal )
+         startIdx = lookbackTotal;
+      if( startIdx > endIdx )
+      {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return RetCode.Success ;
+      }
+      outputSize = endIdx-startIdx+1;
+      bufferSize = outputSize+lookbackTotal;
+      tempBuffer1 = new double[bufferSize] ;
+      tempBuffer2 = new double[bufferSize] ;
+      for(j=0, i=startIdx-lookbackTotal; i<=endIdx; i++, j++)
+      {
+         tempReal = inHigh[i]+inLow[i];
+         if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
+         {
+            tempReal = 4*(inHigh[i]-inLow[i])/tempReal;
+            tempBuffer1[j] = inHigh[i]*(1+tempReal);
+            tempBuffer2[j] = inLow[i]*(1-tempReal);
+         }
+         else
+         {
+            tempBuffer1[j] = inHigh[i];
+            tempBuffer2[j] = inLow[i];
+         }
+      }
+      retCode = sma ( startIdx, endIdx, inClose,
+         optInTimePeriod,
+         outBegIdxDummy , outNbElementDummy , outRealMiddleBand );
+      if( (retCode != RetCode.Success ) || ((int) outNbElementDummy.value != outputSize) )
+      {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return retCode;
+      }
+      retCode = sma ( 0, bufferSize-1, tempBuffer1,
+         optInTimePeriod,
+         outBegIdxDummy , outNbElementDummy ,
+         outRealUpperBand );
+      if( (retCode != RetCode.Success ) || ((int) outNbElementDummy.value != outputSize) )
+      {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return retCode;
+      }
+      retCode = sma ( 0, bufferSize-1, tempBuffer2,
+         optInTimePeriod,
+         outBegIdxDummy , outNbElementDummy ,
+         outRealLowerBand );
+      if( (retCode != RetCode.Success ) || ((int) outNbElementDummy.value != outputSize) )
+      {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return retCode;
+      }
+      outBegIdx.value = startIdx;
+      outNBElement.value = outputSize;
+      return RetCode.Success ;
+   }
+   public RetCode accbands( int startIdx,
+      int endIdx,
+      float inHigh[],
+      float inLow[],
+      float inClose[],
+      int optInTimePeriod,
+      MInteger outBegIdx,
+      MInteger outNBElement,
+      double outRealUpperBand[],
+      double outRealMiddleBand[],
+      double outRealLowerBand[] )
+   {
+      RetCode retCode;
+      double []tempBuffer1 ;
+      double []tempBuffer2 ;
+      MInteger outBegIdxDummy = new MInteger() ;
+      MInteger outNbElementDummy = new MInteger() ;
+      int i, j, outputSize, bufferSize, lookbackTotal;
+      double tempReal;
+      if( startIdx < 0 )
+         return RetCode.OutOfRangeStartIndex ;
+      if( (endIdx < 0) || (endIdx < startIdx))
+         return RetCode.OutOfRangeEndIndex ;
+      if( (int)optInTimePeriod == ( Integer.MIN_VALUE ) )
+         optInTimePeriod = 20;
+      else if( ((int)optInTimePeriod < 2) || ((int)optInTimePeriod > 100000) )
+         return RetCode.BadParam ;
+      lookbackTotal = smaLookback ( optInTimePeriod );
+      if( startIdx < lookbackTotal )
+         startIdx = lookbackTotal;
+      if( startIdx > endIdx )
+      {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return RetCode.Success ;
+      }
+      outputSize = endIdx-startIdx+1;
+      bufferSize = outputSize+lookbackTotal;
+      tempBuffer1 = new double[bufferSize] ;
+      tempBuffer2 = new double[bufferSize] ;
+      for(j=0, i=startIdx-lookbackTotal; i<=endIdx; i++, j++)
+      {
+         tempReal = inHigh[i]+inLow[i];
+         if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
+         {
+            tempReal = 4*(inHigh[i]-inLow[i])/tempReal;
+            tempBuffer1[j] = inHigh[i]*(1+tempReal);
+            tempBuffer2[j] = inLow[i]*(1-tempReal);
+         }
+         else
+         {
+            tempBuffer1[j] = inHigh[i];
+            tempBuffer2[j] = inLow[i];
+         }
+      }
+      retCode = sma ( startIdx, endIdx, inClose,
+         optInTimePeriod,
+         outBegIdxDummy , outNbElementDummy , outRealMiddleBand );
+      if( (retCode != RetCode.Success ) || ((int) outNbElementDummy.value != outputSize) )
+      {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return retCode;
+      }
+      retCode = sma ( 0, bufferSize-1, tempBuffer1,
+         optInTimePeriod,
+         outBegIdxDummy , outNbElementDummy ,
+         outRealUpperBand );
+      if( (retCode != RetCode.Success ) || ((int) outNbElementDummy.value != outputSize) )
+      {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return retCode;
+      }
+      retCode = sma ( 0, bufferSize-1, tempBuffer2,
+         optInTimePeriod,
+         outBegIdxDummy , outNbElementDummy ,
+         outRealLowerBand );
+      if( (retCode != RetCode.Success ) || ((int) outNbElementDummy.value != outputSize) )
+      {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return retCode;
+      }
+      outBegIdx.value = startIdx;
+      outNBElement.value = outputSize;
+      return RetCode.Success ;
+   }
+   /* Generated */
    public int acosLookback( )
    {
       return 0;
@@ -619,12 +804,12 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          {
             minusDI = (100.0*(prevMinusDM/prevTR)) ;
             plusDI = (100.0*(prevPlusDM/prevTR)) ;
             tempReal = minusDI+plusDI;
-            if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+            if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
                sumDX += (100.0 * ( Math.abs (minusDI-plusDI)/tempReal)) ;
          }
       }
@@ -652,12 +837,12 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          {
             minusDI = (100.0*(prevMinusDM/prevTR)) ;
             plusDI = (100.0*(prevPlusDM/prevTR)) ;
             tempReal = minusDI+plusDI;
-            if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+            if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
             {
                tempReal = (100.0*( Math.abs (minusDI-plusDI)/tempReal)) ;
                prevADX = (((prevADX*(optInTimePeriod-1))+tempReal)/optInTimePeriod) ;
@@ -688,12 +873,12 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          {
             minusDI = (100.0*(prevMinusDM/prevTR)) ;
             plusDI = (100.0*(prevPlusDM/prevTR)) ;
             tempReal = minusDI+plusDI;
-            if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+            if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
             {
                tempReal = (100.0*( Math.abs (minusDI-plusDI)/tempReal)) ;
                prevADX = (((prevADX*(optInTimePeriod-1))+tempReal)/optInTimePeriod) ;
@@ -792,12 +977,12 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          {
             minusDI = (100.0*(prevMinusDM/prevTR)) ;
             plusDI = (100.0*(prevPlusDM/prevTR)) ;
             tempReal = minusDI+plusDI;
-            if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+            if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
                sumDX += (100.0 * ( Math.abs (minusDI-plusDI)/tempReal)) ;
          }
       }
@@ -825,12 +1010,12 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          {
             minusDI = (100.0*(prevMinusDM/prevTR)) ;
             plusDI = (100.0*(prevPlusDM/prevTR)) ;
             tempReal = minusDI+plusDI;
-            if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+            if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
             {
                tempReal = (100.0*( Math.abs (minusDI-plusDI)/tempReal)) ;
                prevADX = (((prevADX*(optInTimePeriod-1))+tempReal)/optInTimePeriod) ;
@@ -861,12 +1046,12 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          {
             minusDI = (100.0*(prevMinusDM/prevTR)) ;
             plusDI = (100.0*(prevPlusDM/prevTR)) ;
             tempReal = minusDI+plusDI;
-            if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+            if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
             {
                tempReal = (100.0*( Math.abs (minusDI-plusDI)/tempReal)) ;
                prevADX = (((prevADX*(optInTimePeriod-1))+tempReal)/optInTimePeriod) ;
@@ -1085,7 +1270,7 @@ public class Core {
                for( i=0,j=tempInteger; i < outNbElement1.value ; i++, j++ )
                {
                   tempReal = outReal[i];
-                  if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+                  if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
                      outReal[i] = ((tempBuffer[j]-tempReal)/tempReal)*100.0;
                   else
                      outReal[i] = 0.0;
@@ -1192,7 +1377,7 @@ public class Core {
                for( i=0,j=tempInteger; i < outNbElement1.value ; i++, j++ )
                {
                   tempReal = outReal[i];
-                  if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+                  if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
                      outReal[i] = ((tempBuffer[j]-tempReal)/tempReal)*100.0;
                   else
                      outReal[i] = 0.0;
@@ -1919,6 +2104,109 @@ public class Core {
       return RetCode.Success ;
    }
    /* Generated */
+   public int avgDevLookback( int optInTimePeriod )
+   {
+      if( (int)optInTimePeriod == ( Integer.MIN_VALUE ) )
+         optInTimePeriod = 14;
+      else if( ((int)optInTimePeriod < 2) || ((int)optInTimePeriod > 100000) )
+         return -1;
+      return optInTimePeriod-1;
+   }
+   public RetCode avgDev( int startIdx,
+      int endIdx,
+      double inReal[],
+      int optInTimePeriod,
+      MInteger outBegIdx,
+      MInteger outNBElement,
+      double outReal[] )
+   {
+      int today, outIdx, lookback;
+      if( startIdx < 0 )
+         return RetCode.OutOfRangeStartIndex ;
+      if( (endIdx < 0) || (endIdx < startIdx))
+         return RetCode.OutOfRangeEndIndex ;
+      if( (int)optInTimePeriod == ( Integer.MIN_VALUE ) )
+         optInTimePeriod = 14;
+      else if( ((int)optInTimePeriod < 2) || ((int)optInTimePeriod > 100000) )
+         return RetCode.BadParam ;
+      lookback = optInTimePeriod - 1;
+      if (startIdx < lookback) {
+         startIdx = lookback;
+      }
+      today = startIdx;
+      if( today > endIdx ) {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return RetCode.Success ;
+      }
+      outBegIdx.value = today;
+      outIdx = 0;
+      while (today <= endIdx) {
+         double todaySum, todayDev;
+         int i;
+         todaySum = 0.0;
+         for (i = 0; i < optInTimePeriod; i++) {
+            todaySum += inReal[today-i];
+         }
+         todayDev = 0.0;
+         for (i = 0; i < optInTimePeriod; i++) {
+            todayDev += Math.abs (inReal[today-i] - todaySum/optInTimePeriod);
+         }
+         outReal[outIdx] = todayDev/optInTimePeriod;
+         outIdx++;
+         today++;
+      }
+      outNBElement.value = outIdx;
+      return RetCode.Success ;
+   }
+   public RetCode avgDev( int startIdx,
+      int endIdx,
+      float inReal[],
+      int optInTimePeriod,
+      MInteger outBegIdx,
+      MInteger outNBElement,
+      double outReal[] )
+   {
+      int today, outIdx, lookback;
+      if( startIdx < 0 )
+         return RetCode.OutOfRangeStartIndex ;
+      if( (endIdx < 0) || (endIdx < startIdx))
+         return RetCode.OutOfRangeEndIndex ;
+      if( (int)optInTimePeriod == ( Integer.MIN_VALUE ) )
+         optInTimePeriod = 14;
+      else if( ((int)optInTimePeriod < 2) || ((int)optInTimePeriod > 100000) )
+         return RetCode.BadParam ;
+      lookback = optInTimePeriod - 1;
+      if (startIdx < lookback) {
+         startIdx = lookback;
+      }
+      today = startIdx;
+      if( today > endIdx ) {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return RetCode.Success ;
+      }
+      outBegIdx.value = today;
+      outIdx = 0;
+      while (today <= endIdx) {
+         double todaySum, todayDev;
+         int i;
+         todaySum = 0.0;
+         for (i = 0; i < optInTimePeriod; i++) {
+            todaySum += inReal[today-i];
+         }
+         todayDev = 0.0;
+         for (i = 0; i < optInTimePeriod; i++) {
+            todayDev += Math.abs (inReal[today-i] - todaySum/optInTimePeriod);
+         }
+         outReal[outIdx] = todayDev/optInTimePeriod;
+         outIdx++;
+         today++;
+      }
+      outNBElement.value = outIdx;
+      return RetCode.Success ;
+   }
+   /* Generated */
    public int bbandsLookback( int optInTimePeriod,
       double optInNbDevUp,
       double optInNbDevDn,
@@ -2250,13 +2538,13 @@ public class Core {
       while( i < startIdx )
       {
          tmp_real = inReal0[i];
-         if( ! (((-0.00000001)<last_price_x)&&(last_price_x<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<last_price_x)&&(last_price_x< (0.00000000000001) )) )
             x = (tmp_real-last_price_x)/last_price_x;
          else
             x = 0.0;
          last_price_x = tmp_real;
          tmp_real = inReal1[i++];
-         if( ! (((-0.00000001)<last_price_y)&&(last_price_y<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<last_price_y)&&(last_price_y< (0.00000000000001) )) )
             y = (tmp_real-last_price_y)/last_price_y;
          else
             y = 0.0;
@@ -2271,13 +2559,13 @@ public class Core {
       do
       {
          tmp_real = inReal0[i];
-         if( ! (((-0.00000001)<last_price_x)&&(last_price_x<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<last_price_x)&&(last_price_x< (0.00000000000001) )) )
             x = (tmp_real-last_price_x)/last_price_x;
          else
             x = 0.0;
          last_price_x = tmp_real;
          tmp_real = inReal1[i++];
-         if( ! (((-0.00000001)<last_price_y)&&(last_price_y<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<last_price_y)&&(last_price_y< (0.00000000000001) )) )
             y = (tmp_real-last_price_y)/last_price_y;
          else
             y = 0.0;
@@ -2287,19 +2575,19 @@ public class Core {
          S_x += x;
          S_y += y;
          tmp_real = inReal0[trailingIdx];
-         if( ! (((-0.00000001)<trailing_last_price_x)&&(trailing_last_price_x<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<trailing_last_price_x)&&(trailing_last_price_x< (0.00000000000001) )) )
             x = (tmp_real-trailing_last_price_x)/trailing_last_price_x;
          else
             x = 0.0;
          trailing_last_price_x = tmp_real;
          tmp_real = inReal1[trailingIdx++];
-         if( ! (((-0.00000001)<trailing_last_price_y)&&(trailing_last_price_y<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<trailing_last_price_y)&&(trailing_last_price_y< (0.00000000000001) )) )
             y = (tmp_real-trailing_last_price_y)/trailing_last_price_y;
          else
             y = 0.0;
          trailing_last_price_y = tmp_real;
          tmp_real = (n * S_xx) - (S_x * S_x);
-         if( ! (((-0.00000001)<tmp_real)&&(tmp_real<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tmp_real)&&(tmp_real< (0.00000000000001) )) )
             outReal[outIdx++] = ((n * S_xy) - (S_x * S_y)) / tmp_real;
          else
             outReal[outIdx++] = 0.0;
@@ -2359,13 +2647,13 @@ public class Core {
       while( i < startIdx )
       {
          tmp_real = inReal0[i];
-         if( ! (((-0.00000001)<last_price_x)&&(last_price_x<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<last_price_x)&&(last_price_x< (0.00000000000001) )) )
             x = (tmp_real-last_price_x)/last_price_x;
          else
             x = 0.0;
          last_price_x = tmp_real;
          tmp_real = inReal1[i++];
-         if( ! (((-0.00000001)<last_price_y)&&(last_price_y<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<last_price_y)&&(last_price_y< (0.00000000000001) )) )
             y = (tmp_real-last_price_y)/last_price_y;
          else
             y = 0.0;
@@ -2380,13 +2668,13 @@ public class Core {
       do
       {
          tmp_real = inReal0[i];
-         if( ! (((-0.00000001)<last_price_x)&&(last_price_x<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<last_price_x)&&(last_price_x< (0.00000000000001) )) )
             x = (tmp_real-last_price_x)/last_price_x;
          else
             x = 0.0;
          last_price_x = tmp_real;
          tmp_real = inReal1[i++];
-         if( ! (((-0.00000001)<last_price_y)&&(last_price_y<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<last_price_y)&&(last_price_y< (0.00000000000001) )) )
             y = (tmp_real-last_price_y)/last_price_y;
          else
             y = 0.0;
@@ -2396,19 +2684,19 @@ public class Core {
          S_x += x;
          S_y += y;
          tmp_real = inReal0[trailingIdx];
-         if( ! (((-0.00000001)<trailing_last_price_x)&&(trailing_last_price_x<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<trailing_last_price_x)&&(trailing_last_price_x< (0.00000000000001) )) )
             x = (tmp_real-trailing_last_price_x)/trailing_last_price_x;
          else
             x = 0.0;
          trailing_last_price_x = tmp_real;
          tmp_real = inReal1[trailingIdx++];
-         if( ! (((-0.00000001)<trailing_last_price_y)&&(trailing_last_price_y<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<trailing_last_price_y)&&(trailing_last_price_y< (0.00000000000001) )) )
             y = (tmp_real-trailing_last_price_y)/trailing_last_price_y;
          else
             y = 0.0;
          trailing_last_price_y = tmp_real;
          tmp_real = (n * S_xx) - (S_x * S_x);
-         if( ! (((-0.00000001)<tmp_real)&&(tmp_real<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tmp_real)&&(tmp_real< (0.00000000000001) )) )
             outReal[outIdx++] = ((n * S_xy) - (S_x * S_y)) / tmp_real;
          else
             outReal[outIdx++] = 0.0;
@@ -2446,7 +2734,7 @@ public class Core {
       for( i=startIdx; i <= endIdx; i++ )
       {
          tempReal = inHigh[i]-inLow[i];
-         if( (tempReal<0.00000001) )
+         if( (tempReal< (0.00000000000001) ) )
             outReal[outIdx++] = 0.0;
          else
             outReal[outIdx++] = (inClose[i] - inOpen[i])/tempReal;
@@ -2475,7 +2763,7 @@ public class Core {
       for( i=startIdx; i <= endIdx; i++ )
       {
          tempReal = inHigh[i]-inLow[i];
-         if( (tempReal<0.00000001) )
+         if( (tempReal< (0.00000000000001) ) )
             outReal[outIdx++] = 0.0;
          else
             outReal[outIdx++] = (inClose[i] - inOpen[i])/tempReal;
@@ -3208,7 +3496,9 @@ public class Core {
             inClose[i] < inClose[i-1]
             )
             )
+         {
             outInteger[outIdx++] = ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) * 100;
+         }
          else
             outInteger[outIdx++] = 0;
          i++;
@@ -3255,7 +3545,9 @@ public class Core {
             inClose[i] < inClose[i-1]
             )
             )
+         {
             outInteger[outIdx++] = ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) * 100;
+         }
          else
             outInteger[outIdx++] = 0;
          i++;
@@ -3772,9 +4064,13 @@ public class Core {
             )
             )
             )
+         {
             outInteger[outIdx++] = ( inClose[i] >= inOpen[i] ? 1 : -1 ) * 100;
+         }
          else
+         {
             outInteger[outIdx++] = 0;
+         }
          BodyLongPeriodTotal += ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-2] - inOpen[i-2] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-2] - inLow[i-2] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-2] - ( inClose[i-2] >= inOpen[i-2] ? inClose[i-2] : inOpen[i-2] ) ) + ( ( inClose[i-2] >= inOpen[i-2] ? inOpen[i-2] : inClose[i-2] ) - inLow[i-2] ) : 0 ) ) ) - ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[BodyLongTrailingIdx] - inOpen[BodyLongTrailingIdx] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[BodyLongTrailingIdx] - inLow[BodyLongTrailingIdx] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[BodyLongTrailingIdx] - ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inClose[BodyLongTrailingIdx] : inOpen[BodyLongTrailingIdx] ) ) + ( ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inOpen[BodyLongTrailingIdx] : inClose[BodyLongTrailingIdx] ) - inLow[BodyLongTrailingIdx] ) : 0 ) ) ) ;
          BodyDojiPeriodTotal += ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-1] - inLow[i-1] ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-1] - ( inClose[i-1] >= inOpen[i-1] ? inClose[i-1] : inOpen[i-1] ) ) + ( ( inClose[i-1] >= inOpen[i-1] ? inOpen[i-1] : inClose[i-1] ) - inLow[i-1] ) : 0 ) ) ) - ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[BodyDojiTrailingIdx] - inOpen[BodyDojiTrailingIdx] ) ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[BodyDojiTrailingIdx] - inLow[BodyDojiTrailingIdx] ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[BodyDojiTrailingIdx] - ( inClose[BodyDojiTrailingIdx] >= inOpen[BodyDojiTrailingIdx] ? inClose[BodyDojiTrailingIdx] : inOpen[BodyDojiTrailingIdx] ) ) + ( ( inClose[BodyDojiTrailingIdx] >= inOpen[BodyDojiTrailingIdx] ? inOpen[BodyDojiTrailingIdx] : inClose[BodyDojiTrailingIdx] ) - inLow[BodyDojiTrailingIdx] ) : 0 ) ) ) ;
          BodyShortPeriodTotal += ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i] - inOpen[i] ) ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i] - inLow[i] ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i] - ( inClose[i] >= inOpen[i] ? inClose[i] : inOpen[i] ) ) + ( ( inClose[i] >= inOpen[i] ? inOpen[i] : inClose[i] ) - inLow[i] ) : 0 ) ) ) - ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[BodyShortTrailingIdx] - inOpen[BodyShortTrailingIdx] ) ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[BodyShortTrailingIdx] - inLow[BodyShortTrailingIdx] ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[BodyShortTrailingIdx] - ( inClose[BodyShortTrailingIdx] >= inOpen[BodyShortTrailingIdx] ? inClose[BodyShortTrailingIdx] : inOpen[BodyShortTrailingIdx] ) ) + ( ( inClose[BodyShortTrailingIdx] >= inOpen[BodyShortTrailingIdx] ? inOpen[BodyShortTrailingIdx] : inClose[BodyShortTrailingIdx] ) - inLow[BodyShortTrailingIdx] ) : 0 ) ) ) ;
@@ -3861,9 +4157,13 @@ public class Core {
             )
             )
             )
+         {
             outInteger[outIdx++] = ( inClose[i] >= inOpen[i] ? 1 : -1 ) * 100;
+         }
          else
+         {
             outInteger[outIdx++] = 0;
+         }
          BodyLongPeriodTotal += ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-2] - inOpen[i-2] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-2] - inLow[i-2] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-2] - ( inClose[i-2] >= inOpen[i-2] ? inClose[i-2] : inOpen[i-2] ) ) + ( ( inClose[i-2] >= inOpen[i-2] ? inOpen[i-2] : inClose[i-2] ) - inLow[i-2] ) : 0 ) ) ) - ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[BodyLongTrailingIdx] - inOpen[BodyLongTrailingIdx] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[BodyLongTrailingIdx] - inLow[BodyLongTrailingIdx] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[BodyLongTrailingIdx] - ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inClose[BodyLongTrailingIdx] : inOpen[BodyLongTrailingIdx] ) ) + ( ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inOpen[BodyLongTrailingIdx] : inClose[BodyLongTrailingIdx] ) - inLow[BodyLongTrailingIdx] ) : 0 ) ) ) ;
          BodyDojiPeriodTotal += ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-1] - inLow[i-1] ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-1] - ( inClose[i-1] >= inOpen[i-1] ? inClose[i-1] : inOpen[i-1] ) ) + ( ( inClose[i-1] >= inOpen[i-1] ? inOpen[i-1] : inClose[i-1] ) - inLow[i-1] ) : 0 ) ) ) - ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[BodyDojiTrailingIdx] - inOpen[BodyDojiTrailingIdx] ) ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[BodyDojiTrailingIdx] - inLow[BodyDojiTrailingIdx] ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[BodyDojiTrailingIdx] - ( inClose[BodyDojiTrailingIdx] >= inOpen[BodyDojiTrailingIdx] ? inClose[BodyDojiTrailingIdx] : inOpen[BodyDojiTrailingIdx] ) ) + ( ( inClose[BodyDojiTrailingIdx] >= inOpen[BodyDojiTrailingIdx] ? inOpen[BodyDojiTrailingIdx] : inClose[BodyDojiTrailingIdx] ) - inLow[BodyDojiTrailingIdx] ) : 0 ) ) ) ;
          BodyShortPeriodTotal += ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i] - inOpen[i] ) ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i] - inLow[i] ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i] - ( inClose[i] >= inOpen[i] ? inClose[i] : inOpen[i] ) ) + ( ( inClose[i] >= inOpen[i] ? inOpen[i] : inClose[i] ) - inLow[i] ) : 0 ) ) ) - ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[BodyShortTrailingIdx] - inOpen[BodyShortTrailingIdx] ) ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[BodyShortTrailingIdx] - inLow[BodyShortTrailingIdx] ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[BodyShortTrailingIdx] - ( inClose[BodyShortTrailingIdx] >= inOpen[BodyShortTrailingIdx] ? inClose[BodyShortTrailingIdx] : inOpen[BodyShortTrailingIdx] ) ) + ( ( inClose[BodyShortTrailingIdx] >= inOpen[BodyShortTrailingIdx] ? inOpen[BodyShortTrailingIdx] : inClose[BodyShortTrailingIdx] ) - inLow[BodyShortTrailingIdx] ) : 0 ) ) ) ;
@@ -5370,14 +5670,21 @@ public class Core {
       do
       {
          if( ( ( inClose[i] >= inOpen[i] ? 1 : -1 ) == 1 && ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) == -1 &&
-            inClose[i] > inOpen[i-1] && inOpen[i] < inClose[i-1]
+            ( ( inClose[i] >= inOpen[i-1] && inOpen[i] < inClose[i-1] ) ||
+            ( inClose[i] > inOpen[i-1] && inOpen[i] <= inClose[i-1] )
+            )
             )
             ||
             ( ( inClose[i] >= inOpen[i] ? 1 : -1 ) == -1 && ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) == 1 &&
-            inOpen[i] > inClose[i-1] && inClose[i] < inOpen[i-1]
+            ( ( inOpen[i] >= inClose[i-1] && inClose[i] < inOpen[i-1] ) ||
+            ( inOpen[i] > inClose[i-1] && inClose[i] <= inOpen[i-1] )
             )
             )
+            )
+            if( inOpen[i] != inClose[i-1] && inClose[i] != inOpen[i-1] )
             outInteger[outIdx++] = ( inClose[i] >= inOpen[i] ? 1 : -1 ) * 100;
+         else
+            outInteger[outIdx++] = ( inClose[i] >= inOpen[i] ? 1 : -1 ) * 80;
          else
             outInteger[outIdx++] = 0;
          i++;
@@ -5415,14 +5722,21 @@ public class Core {
       do
       {
          if( ( ( inClose[i] >= inOpen[i] ? 1 : -1 ) == 1 && ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) == -1 &&
-            inClose[i] > inOpen[i-1] && inOpen[i] < inClose[i-1]
+            ( ( inClose[i] >= inOpen[i-1] && inOpen[i] < inClose[i-1] ) ||
+            ( inClose[i] > inOpen[i-1] && inOpen[i] <= inClose[i-1] )
+            )
             )
             ||
             ( ( inClose[i] >= inOpen[i] ? 1 : -1 ) == -1 && ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) == 1 &&
-            inOpen[i] > inClose[i-1] && inClose[i] < inOpen[i-1]
+            ( ( inOpen[i] >= inClose[i-1] && inClose[i] < inOpen[i-1] ) ||
+            ( inOpen[i] > inClose[i-1] && inClose[i] <= inOpen[i-1] )
             )
             )
+            )
+            if( inOpen[i] != inClose[i-1] && inClose[i] != inOpen[i-1] )
             outInteger[outIdx++] = ( inClose[i] >= inOpen[i] ? 1 : -1 ) * 100;
+         else
+            outInteger[outIdx++] = ( inClose[i] >= inOpen[i] ? 1 : -1 ) * 80;
          else
             outInteger[outIdx++] = 0;
          i++;
@@ -6411,11 +6725,19 @@ public class Core {
       do
       {
          if( ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) > ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].avgPeriod) != 0.0? BodyLongPeriodTotal / (this.candleSettings[CandleSettingType.BodyLong.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-1] - inLow[i-1] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-1] - ( inClose[i-1] >= inOpen[i-1] ? inClose[i-1] : inOpen[i-1] ) ) + ( ( inClose[i-1] >= inOpen[i-1] ? inOpen[i-1] : inClose[i-1] ) - inLow[i-1] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) ) &&
-            ( Math.abs ( inClose[i] - inOpen[i] ) ) <= ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].avgPeriod) != 0.0? BodyShortPeriodTotal / (this.candleSettings[CandleSettingType.BodyShort.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i] - inOpen[i] ) ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i] - inLow[i] ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i] - ( inClose[i] >= inOpen[i] ? inClose[i] : inOpen[i] ) ) + ( ( inClose[i] >= inOpen[i] ? inOpen[i] : inClose[i] ) - inLow[i] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) ) &&
-            (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) < (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
+            ( Math.abs ( inClose[i] - inOpen[i] ) ) <= ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].avgPeriod) != 0.0? BodyShortPeriodTotal / (this.candleSettings[CandleSettingType.BodyShort.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i] - inOpen[i] ) ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i] - inLow[i] ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i] - ( inClose[i] >= inOpen[i] ? inClose[i] : inOpen[i] ) ) + ( ( inClose[i] >= inOpen[i] ? inOpen[i] : inClose[i] ) - inLow[i] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) )
+            )
+            if ( (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) < (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
             (((inClose[i]) < (inOpen[i])) ? (inClose[i]) : (inOpen[i])) > (((inClose[i-1]) < (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1]))
             )
             outInteger[outIdx++] = - ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) * 100;
+         else
+            if ( (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) <= (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
+            (((inClose[i]) < (inOpen[i])) ? (inClose[i]) : (inOpen[i])) >= (((inClose[i-1]) < (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1]))
+            )
+            outInteger[outIdx++] = - ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) * 80;
+         else
+            outInteger[outIdx++] = 0;
          else
             outInteger[outIdx++] = 0;
          BodyLongPeriodTotal += ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-1] - inLow[i-1] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-1] - ( inClose[i-1] >= inOpen[i-1] ? inClose[i-1] : inOpen[i-1] ) ) + ( ( inClose[i-1] >= inOpen[i-1] ? inOpen[i-1] : inClose[i-1] ) - inLow[i-1] ) : 0 ) ) ) - ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[BodyLongTrailingIdx] - inOpen[BodyLongTrailingIdx] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[BodyLongTrailingIdx] - inLow[BodyLongTrailingIdx] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[BodyLongTrailingIdx] - ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inClose[BodyLongTrailingIdx] : inOpen[BodyLongTrailingIdx] ) ) + ( ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inOpen[BodyLongTrailingIdx] : inClose[BodyLongTrailingIdx] ) - inLow[BodyLongTrailingIdx] ) : 0 ) ) ) ;
@@ -6472,11 +6794,19 @@ public class Core {
       do
       {
          if( ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) > ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].avgPeriod) != 0.0? BodyLongPeriodTotal / (this.candleSettings[CandleSettingType.BodyLong.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-1] - inLow[i-1] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-1] - ( inClose[i-1] >= inOpen[i-1] ? inClose[i-1] : inOpen[i-1] ) ) + ( ( inClose[i-1] >= inOpen[i-1] ? inOpen[i-1] : inClose[i-1] ) - inLow[i-1] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) ) &&
-            ( Math.abs ( inClose[i] - inOpen[i] ) ) <= ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].avgPeriod) != 0.0? BodyShortPeriodTotal / (this.candleSettings[CandleSettingType.BodyShort.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i] - inOpen[i] ) ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i] - inLow[i] ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i] - ( inClose[i] >= inOpen[i] ? inClose[i] : inOpen[i] ) ) + ( ( inClose[i] >= inOpen[i] ? inOpen[i] : inClose[i] ) - inLow[i] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) ) &&
-            (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) < (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
+            ( Math.abs ( inClose[i] - inOpen[i] ) ) <= ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].avgPeriod) != 0.0? BodyShortPeriodTotal / (this.candleSettings[CandleSettingType.BodyShort.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i] - inOpen[i] ) ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i] - inLow[i] ) : ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i] - ( inClose[i] >= inOpen[i] ? inClose[i] : inOpen[i] ) ) + ( ( inClose[i] >= inOpen[i] ? inOpen[i] : inClose[i] ) - inLow[i] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyShort.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) )
+            )
+            if ( (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) < (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
             (((inClose[i]) < (inOpen[i])) ? (inClose[i]) : (inOpen[i])) > (((inClose[i-1]) < (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1]))
             )
             outInteger[outIdx++] = - ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) * 100;
+         else
+            if ( (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) <= (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
+            (((inClose[i]) < (inOpen[i])) ? (inClose[i]) : (inOpen[i])) >= (((inClose[i-1]) < (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1]))
+            )
+            outInteger[outIdx++] = - ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) * 80;
+         else
+            outInteger[outIdx++] = 0;
          else
             outInteger[outIdx++] = 0;
          BodyLongPeriodTotal += ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-1] - inLow[i-1] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-1] - ( inClose[i-1] >= inOpen[i-1] ? inClose[i-1] : inOpen[i-1] ) ) + ( ( inClose[i-1] >= inOpen[i-1] ? inOpen[i-1] : inClose[i-1] ) - inLow[i-1] ) : 0 ) ) ) - ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[BodyLongTrailingIdx] - inOpen[BodyLongTrailingIdx] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[BodyLongTrailingIdx] - inLow[BodyLongTrailingIdx] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[BodyLongTrailingIdx] - ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inClose[BodyLongTrailingIdx] : inOpen[BodyLongTrailingIdx] ) ) + ( ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inOpen[BodyLongTrailingIdx] : inClose[BodyLongTrailingIdx] ) - inLow[BodyLongTrailingIdx] ) : 0 ) ) ) ;
@@ -6538,11 +6868,18 @@ public class Core {
       do
       {
          if( ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) > ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].avgPeriod) != 0.0? BodyLongPeriodTotal / (this.candleSettings[CandleSettingType.BodyLong.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-1] - inLow[i-1] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-1] - ( inClose[i-1] >= inOpen[i-1] ? inClose[i-1] : inOpen[i-1] ) ) + ( ( inClose[i-1] >= inOpen[i-1] ? inOpen[i-1] : inClose[i-1] ) - inLow[i-1] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) ) &&
-            ( Math.abs ( inClose[i] - inOpen[i] ) ) <= ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].avgPeriod) != 0.0? BodyDojiPeriodTotal / (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i] - inOpen[i] ) ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i] - inLow[i] ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i] - ( inClose[i] >= inOpen[i] ? inClose[i] : inOpen[i] ) ) + ( ( inClose[i] >= inOpen[i] ? inOpen[i] : inClose[i] ) - inLow[i] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) ) &&
-            (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) < (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
+            ( Math.abs ( inClose[i] - inOpen[i] ) ) <= ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].avgPeriod) != 0.0? BodyDojiPeriodTotal / (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i] - inOpen[i] ) ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i] - inLow[i] ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i] - ( inClose[i] >= inOpen[i] ? inClose[i] : inOpen[i] ) ) + ( ( inClose[i] >= inOpen[i] ? inOpen[i] : inClose[i] ) - inLow[i] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) ) )
+            if ( (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) < (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
             (((inClose[i]) < (inOpen[i])) ? (inClose[i]) : (inOpen[i])) > (((inClose[i-1]) < (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1]))
             )
             outInteger[outIdx++] = - ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) * 100;
+         else
+            if ( (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) <= (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
+            (((inClose[i]) < (inOpen[i])) ? (inClose[i]) : (inOpen[i])) >= (((inClose[i-1]) < (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1]))
+            )
+            outInteger[outIdx++] = - ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) * 80;
+         else
+            outInteger[outIdx++] = 0;
          else
             outInteger[outIdx++] = 0;
          BodyLongPeriodTotal += ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-1] - inLow[i-1] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-1] - ( inClose[i-1] >= inOpen[i-1] ? inClose[i-1] : inOpen[i-1] ) ) + ( ( inClose[i-1] >= inOpen[i-1] ? inOpen[i-1] : inClose[i-1] ) - inLow[i-1] ) : 0 ) ) ) - ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[BodyLongTrailingIdx] - inOpen[BodyLongTrailingIdx] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[BodyLongTrailingIdx] - inLow[BodyLongTrailingIdx] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[BodyLongTrailingIdx] - ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inClose[BodyLongTrailingIdx] : inOpen[BodyLongTrailingIdx] ) ) + ( ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inOpen[BodyLongTrailingIdx] : inClose[BodyLongTrailingIdx] ) - inLow[BodyLongTrailingIdx] ) : 0 ) ) ) ;
@@ -6599,11 +6936,18 @@ public class Core {
       do
       {
          if( ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) > ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].avgPeriod) != 0.0? BodyLongPeriodTotal / (this.candleSettings[CandleSettingType.BodyLong.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-1] - inLow[i-1] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-1] - ( inClose[i-1] >= inOpen[i-1] ? inClose[i-1] : inOpen[i-1] ) ) + ( ( inClose[i-1] >= inOpen[i-1] ? inOpen[i-1] : inClose[i-1] ) - inLow[i-1] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) ) &&
-            ( Math.abs ( inClose[i] - inOpen[i] ) ) <= ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].avgPeriod) != 0.0? BodyDojiPeriodTotal / (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i] - inOpen[i] ) ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i] - inLow[i] ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i] - ( inClose[i] >= inOpen[i] ? inClose[i] : inOpen[i] ) ) + ( ( inClose[i] >= inOpen[i] ? inOpen[i] : inClose[i] ) - inLow[i] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) ) &&
-            (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) < (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
+            ( Math.abs ( inClose[i] - inOpen[i] ) ) <= ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].factor) * ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].avgPeriod) != 0.0? BodyDojiPeriodTotal / (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].avgPeriod) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i] - inOpen[i] ) ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i] - inLow[i] ) : ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i] - ( inClose[i] >= inOpen[i] ? inClose[i] : inOpen[i] ) ) + ( ( inClose[i] >= inOpen[i] ? inOpen[i] : inClose[i] ) - inLow[i] ) : 0 ) ) ) ) / ( (this.candleSettings[CandleSettingType.BodyDoji.ordinal()].rangeType) == RangeType.Shadows ? 2.0 : 1.0 ) ) )
+            if ( (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) < (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
             (((inClose[i]) < (inOpen[i])) ? (inClose[i]) : (inOpen[i])) > (((inClose[i-1]) < (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1]))
             )
             outInteger[outIdx++] = - ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) * 100;
+         else
+            if ( (((inClose[i]) > (inOpen[i])) ? (inClose[i]) : (inOpen[i])) <= (((inClose[i-1]) > (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1])) &&
+            (((inClose[i]) < (inOpen[i])) ? (inClose[i]) : (inOpen[i])) >= (((inClose[i-1]) < (inOpen[i-1])) ? (inClose[i-1]) : (inOpen[i-1]))
+            )
+            outInteger[outIdx++] = - ( inClose[i-1] >= inOpen[i-1] ? 1 : -1 ) * 80;
+         else
+            outInteger[outIdx++] = 0;
          else
             outInteger[outIdx++] = 0;
          BodyLongPeriodTotal += ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[i-1] - inOpen[i-1] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[i-1] - inLow[i-1] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[i-1] - ( inClose[i-1] >= inOpen[i-1] ? inClose[i-1] : inOpen[i-1] ) ) + ( ( inClose[i-1] >= inOpen[i-1] ? inOpen[i-1] : inClose[i-1] ) - inLow[i-1] ) : 0 ) ) ) - ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.RealBody ? ( Math.abs ( inClose[BodyLongTrailingIdx] - inOpen[BodyLongTrailingIdx] ) ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.HighLow ? ( inHigh[BodyLongTrailingIdx] - inLow[BodyLongTrailingIdx] ) : ( (this.candleSettings[CandleSettingType.BodyLong.ordinal()].rangeType) == RangeType.Shadows ? ( inHigh[BodyLongTrailingIdx] - ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inClose[BodyLongTrailingIdx] : inOpen[BodyLongTrailingIdx] ) ) + ( ( inClose[BodyLongTrailingIdx] >= inOpen[BodyLongTrailingIdx] ? inOpen[BodyLongTrailingIdx] : inClose[BodyLongTrailingIdx] ) - inLow[BodyLongTrailingIdx] ) : 0 ) ) ) ;
@@ -11590,7 +11934,7 @@ public class Core {
          tempValue2 = prevGain/optInTimePeriod;
          tempValue3 = tempValue2-tempValue1;
          tempValue4 = tempValue1+tempValue2;
-         if( ! (((-0.00000001)<tempValue4)&&(tempValue4<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue4)&&(tempValue4< (0.00000000000001) )) )
             outReal[outIdx++] = 100*(tempValue3/tempValue4);
          else
             outReal[outIdx++] = 0.0;
@@ -11621,7 +11965,7 @@ public class Core {
       if( today > startIdx )
       {
          tempValue1 = prevGain+prevLoss;
-         if( ! (((-0.00000001)<tempValue1)&&(tempValue1<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue1)&&(tempValue1< (0.00000000000001) )) )
             outReal[outIdx++] = 100.0*((prevGain-prevLoss)/tempValue1);
          else
             outReal[outIdx++] = 0.0;
@@ -11658,7 +12002,7 @@ public class Core {
          prevLoss /= optInTimePeriod;
          prevGain /= optInTimePeriod;
          tempValue1 = prevGain+prevLoss;
-         if( ! (((-0.00000001)<tempValue1)&&(tempValue1<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue1)&&(tempValue1< (0.00000000000001) )) )
             outReal[outIdx++] = 100.0*((prevGain-prevLoss)/tempValue1);
          else
             outReal[outIdx++] = 0.0;
@@ -11679,6 +12023,7 @@ public class Core {
       int today, lookbackTotal, unstablePeriod, i;
       double prevGain, prevLoss, prevValue, savePrevValue;
       double tempValue1, tempValue2, tempValue3, tempValue4;
+      int mmmixi, mmmixdestIdx, mmmixsrcIdx ;
       if( startIdx < 0 )
          return RetCode.OutOfRangeStartIndex ;
       if( (endIdx < 0) || (endIdx < startIdx))
@@ -11700,7 +12045,7 @@ public class Core {
          outBegIdx.value = startIdx;
          i = (endIdx-startIdx)+1;
          outNBElement.value = i;
-         System.arraycopy(inReal,startIdx,outReal,0,i) ;
+         { for( mmmixi=0, mmmixdestIdx=0, mmmixsrcIdx=startIdx; mmmixi < i; mmmixi++, mmmixdestIdx++, mmmixsrcIdx++ ) { outReal[mmmixdestIdx] = inReal[mmmixsrcIdx]; } } ;
          return RetCode.Success ;
       }
       today = startIdx-lookbackTotal;
@@ -11726,7 +12071,7 @@ public class Core {
          tempValue2 = prevGain/optInTimePeriod;
          tempValue3 = tempValue2-tempValue1;
          tempValue4 = tempValue1+tempValue2;
-         if( ! (((-0.00000001)<tempValue4)&&(tempValue4<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue4)&&(tempValue4< (0.00000000000001) )) )
             outReal[outIdx++] = 100*(tempValue3/tempValue4);
          else
             outReal[outIdx++] = 0.0;
@@ -11757,7 +12102,7 @@ public class Core {
       if( today > startIdx )
       {
          tempValue1 = prevGain+prevLoss;
-         if( ! (((-0.00000001)<tempValue1)&&(tempValue1<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue1)&&(tempValue1< (0.00000000000001) )) )
             outReal[outIdx++] = 100.0*((prevGain-prevLoss)/tempValue1);
          else
             outReal[outIdx++] = 0.0;
@@ -11794,7 +12139,7 @@ public class Core {
          prevLoss /= optInTimePeriod;
          prevGain /= optInTimePeriod;
          tempValue1 = prevGain+prevLoss;
-         if( ! (((-0.00000001)<tempValue1)&&(tempValue1<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue1)&&(tempValue1< (0.00000000000001) )) )
             outReal[outIdx++] = 100.0*((prevGain-prevLoss)/tempValue1);
          else
             outReal[outIdx++] = 0.0;
@@ -11857,7 +12202,7 @@ public class Core {
       trailingX = inReal0[trailingIdx];
       trailingY = inReal1[trailingIdx++];
       tempReal = (sumX2-((sumX*sumX)/optInTimePeriod)) * (sumY2-((sumY*sumY)/optInTimePeriod));
-      if( ! (tempReal<0.00000001) )
+      if( ! (tempReal< (0.00000000000001) ) )
          outReal[0] = (sumXY-((sumX*sumY)/optInTimePeriod)) / Math.sqrt (tempReal);
       else
          outReal[0] = 0.0;
@@ -11879,7 +12224,7 @@ public class Core {
          trailingX = inReal0[trailingIdx];
          trailingY = inReal1[trailingIdx++];
          tempReal = (sumX2-((sumX*sumX)/optInTimePeriod)) * (sumY2-((sumY*sumY)/optInTimePeriod));
-         if( ! (tempReal<0.00000001) )
+         if( ! (tempReal< (0.00000000000001) ) )
             outReal[outIdx++] = (sumXY-((sumX*sumY)/optInTimePeriod)) / Math.sqrt (tempReal);
          else
             outReal[outIdx++] = 0.0;
@@ -11932,7 +12277,7 @@ public class Core {
       trailingX = inReal0[trailingIdx];
       trailingY = inReal1[trailingIdx++];
       tempReal = (sumX2-((sumX*sumX)/optInTimePeriod)) * (sumY2-((sumY*sumY)/optInTimePeriod));
-      if( ! (tempReal<0.00000001) )
+      if( ! (tempReal< (0.00000000000001) ) )
          outReal[0] = (sumXY-((sumX*sumY)/optInTimePeriod)) / Math.sqrt (tempReal);
       else
          outReal[0] = 0.0;
@@ -11954,7 +12299,7 @@ public class Core {
          trailingX = inReal0[trailingIdx];
          trailingY = inReal1[trailingIdx++];
          tempReal = (sumX2-((sumX*sumX)/optInTimePeriod)) * (sumY2-((sumY*sumY)/optInTimePeriod));
-         if( ! (tempReal<0.00000001) )
+         if( ! (tempReal< (0.00000000000001) ) )
             outReal[outIdx++] = (sumXY-((sumX*sumY)/optInTimePeriod)) / Math.sqrt (tempReal);
          else
             outReal[outIdx++] = 0.0;
@@ -12350,12 +12695,12 @@ public class Core {
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
       }
-      if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+      if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
       {
          minusDI = (100.0*(prevMinusDM/prevTR)) ;
          plusDI = (100.0*(prevPlusDM/prevTR)) ;
          tempReal = minusDI+plusDI;
-         if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
             outReal[0] = (100.0 * ( Math.abs (minusDI-plusDI)/tempReal)) ;
          else
             outReal[0] = 0.0;
@@ -12385,12 +12730,12 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          {
             minusDI = (100.0*(prevMinusDM/prevTR)) ;
             plusDI = (100.0*(prevPlusDM/prevTR)) ;
             tempReal = minusDI+plusDI;
-            if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+            if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
                outReal[outIdx] = (100.0 * ( Math.abs (minusDI-plusDI)/tempReal)) ;
             else
                outReal[outIdx] = outReal[outIdx-1];
@@ -12493,12 +12838,12 @@ public class Core {
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
       }
-      if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+      if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
       {
          minusDI = (100.0*(prevMinusDM/prevTR)) ;
          plusDI = (100.0*(prevPlusDM/prevTR)) ;
          tempReal = minusDI+plusDI;
-         if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
             outReal[0] = (100.0 * ( Math.abs (minusDI-plusDI)/tempReal)) ;
          else
             outReal[0] = 0.0;
@@ -12528,12 +12873,12 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          {
             minusDI = (100.0*(prevMinusDM/prevTR)) ;
             plusDI = (100.0*(prevPlusDM/prevTR)) ;
             tempReal = minusDI+plusDI;
-            if( ! (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+            if( ! (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
                outReal[outIdx] = (100.0 * ( Math.abs (minusDI-plusDI)/tempReal)) ;
             else
                outReal[outIdx] = outReal[outIdx-1];
@@ -14783,6 +15128,107 @@ public class Core {
       return RetCode.Success ;
    }
    /* Generated */
+   public int imiLookback( int optInTimePeriod )
+   {
+      if( (int)optInTimePeriod == ( Integer.MIN_VALUE ) )
+         optInTimePeriod = 14;
+      else if( ((int)optInTimePeriod < 2) || ((int)optInTimePeriod > 100000) )
+         return -1;
+      return optInTimePeriod + (this.unstablePeriod[FuncUnstId.Imi.ordinal()]) - 1;
+   }
+   public RetCode imi( int startIdx,
+      int endIdx,
+      double inOpen[],
+      double inClose[],
+      int optInTimePeriod,
+      MInteger outBegIdx,
+      MInteger outNBElement,
+      double outReal[] )
+   {
+      int lookback, outIdx = 0;
+      if( startIdx < 0 )
+         return RetCode.OutOfRangeStartIndex ;
+      if( (endIdx < 0) || (endIdx < startIdx))
+         return RetCode.OutOfRangeEndIndex ;
+      if( (int)optInTimePeriod == ( Integer.MIN_VALUE ) )
+         optInTimePeriod = 14;
+      else if( ((int)optInTimePeriod < 2) || ((int)optInTimePeriod > 100000) )
+         return RetCode.BadParam ;
+      lookback = imiLookback ( optInTimePeriod );
+      if(startIdx < lookback)
+         startIdx = lookback;
+      if( startIdx > endIdx ) {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return RetCode.Success ;
+      }
+      outBegIdx.value = startIdx;
+      while (startIdx <= endIdx) {
+         double upsum = .0, downsum = .0;
+         int i;
+         for (i = startIdx - lookback; i <= startIdx; i++) {
+            double close = inClose[i];
+            double open = inOpen[i];
+            if (close > open) {
+               upsum += (close - open);
+            } else {
+               downsum += (open - close);
+            }
+            outReal[outIdx] = 100.0*(upsum/(upsum + downsum));
+         }
+         startIdx++;
+         outIdx++;
+      }
+      outNBElement.value = outIdx;
+      return RetCode.Success ;
+   }
+   public RetCode imi( int startIdx,
+      int endIdx,
+      float inOpen[],
+      float inClose[],
+      int optInTimePeriod,
+      MInteger outBegIdx,
+      MInteger outNBElement,
+      double outReal[] )
+   {
+      int lookback, outIdx = 0;
+      if( startIdx < 0 )
+         return RetCode.OutOfRangeStartIndex ;
+      if( (endIdx < 0) || (endIdx < startIdx))
+         return RetCode.OutOfRangeEndIndex ;
+      if( (int)optInTimePeriod == ( Integer.MIN_VALUE ) )
+         optInTimePeriod = 14;
+      else if( ((int)optInTimePeriod < 2) || ((int)optInTimePeriod > 100000) )
+         return RetCode.BadParam ;
+      lookback = imiLookback ( optInTimePeriod );
+      if(startIdx < lookback)
+         startIdx = lookback;
+      if( startIdx > endIdx ) {
+         outBegIdx.value = 0 ;
+         outNBElement.value = 0 ;
+         return RetCode.Success ;
+      }
+      outBegIdx.value = startIdx;
+      while (startIdx <= endIdx) {
+         double upsum = .0, downsum = .0;
+         int i;
+         for (i = startIdx - lookback; i <= startIdx; i++) {
+            double close = inClose[i];
+            double open = inOpen[i];
+            if (close > open) {
+               upsum += (close - open);
+            } else {
+               downsum += (open - close);
+            }
+            outReal[outIdx] = 100.0*(upsum/(upsum + downsum));
+         }
+         startIdx++;
+         outIdx++;
+      }
+      outNBElement.value = outIdx;
+      return RetCode.Success ;
+   }
+   /* Generated */
    public int kamaLookback( int optInTimePeriod )
    {
       if( (int)optInTimePeriod == ( Integer.MIN_VALUE ) )
@@ -14840,7 +15286,7 @@ public class Core {
       tempReal2 = inReal[trailingIdx++];
       periodROC = tempReal-tempReal2;
       trailingValue = tempReal2;
-      if( (sumROC1 <= periodROC) || (((-0.00000001)<sumROC1)&&(sumROC1<0.00000001)) )
+      if( (sumROC1 <= periodROC) || (((- (0.00000000000001) )<sumROC1)&&(sumROC1< (0.00000000000001) )) )
          tempReal = 1.0;
       else
          tempReal = Math.abs (periodROC/sumROC1);
@@ -14855,7 +15301,7 @@ public class Core {
          sumROC1 -= Math.abs (trailingValue-tempReal2);
          sumROC1 += Math.abs (tempReal-inReal[today-1]);
          trailingValue = tempReal2;
-         if( (sumROC1 <= periodROC) || (((-0.00000001)<sumROC1)&&(sumROC1<0.00000001)) )
+         if( (sumROC1 <= periodROC) || (((- (0.00000000000001) )<sumROC1)&&(sumROC1< (0.00000000000001) )) )
             tempReal = 1.0;
          else
             tempReal = Math.abs (periodROC/sumROC1);
@@ -14874,7 +15320,7 @@ public class Core {
          sumROC1 -= Math.abs (trailingValue-tempReal2);
          sumROC1 += Math.abs (tempReal-inReal[today-1]);
          trailingValue = tempReal2;
-         if( (sumROC1 <= periodROC) || (((-0.00000001)<sumROC1)&&(sumROC1<0.00000001)) )
+         if( (sumROC1 <= periodROC) || (((- (0.00000000000001) )<sumROC1)&&(sumROC1< (0.00000000000001) )) )
             tempReal = 1.0;
          else
             tempReal = Math.abs (periodROC / sumROC1);
@@ -14935,7 +15381,7 @@ public class Core {
       tempReal2 = inReal[trailingIdx++];
       periodROC = tempReal-tempReal2;
       trailingValue = tempReal2;
-      if( (sumROC1 <= periodROC) || (((-0.00000001)<sumROC1)&&(sumROC1<0.00000001)) )
+      if( (sumROC1 <= periodROC) || (((- (0.00000000000001) )<sumROC1)&&(sumROC1< (0.00000000000001) )) )
          tempReal = 1.0;
       else
          tempReal = Math.abs (periodROC/sumROC1);
@@ -14950,7 +15396,7 @@ public class Core {
          sumROC1 -= Math.abs (trailingValue-tempReal2);
          sumROC1 += Math.abs (tempReal-inReal[today-1]);
          trailingValue = tempReal2;
-         if( (sumROC1 <= periodROC) || (((-0.00000001)<sumROC1)&&(sumROC1<0.00000001)) )
+         if( (sumROC1 <= periodROC) || (((- (0.00000000000001) )<sumROC1)&&(sumROC1< (0.00000000000001) )) )
             tempReal = 1.0;
          else
             tempReal = Math.abs (periodROC/sumROC1);
@@ -14969,7 +15415,7 @@ public class Core {
          sumROC1 -= Math.abs (trailingValue-tempReal2);
          sumROC1 += Math.abs (tempReal-inReal[today-1]);
          trailingValue = tempReal2;
-         if( (sumROC1 <= periodROC) || (((-0.00000001)<sumROC1)&&(sumROC1<0.00000001)) )
+         if( (sumROC1 <= periodROC) || (((- (0.00000000000001) )<sumROC1)&&(sumROC1< (0.00000000000001) )) )
             tempReal = 1.0;
          else
             tempReal = Math.abs (periodROC / sumROC1);
@@ -18444,7 +18890,7 @@ public class Core {
             if( (diffM > 0) && (diffP < diffM) )
             {
                { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
-               if( (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+               if( (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
                   outReal[outIdx++] = (double)0.0;
                else
                   outReal[outIdx++] = diffM/tempReal;
@@ -18503,7 +18949,7 @@ public class Core {
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
       }
-      if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+      if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          outReal[0] = (100.0*(prevMinusDM/prevTR)) ;
       else
          outReal[0] = 0.0;
@@ -18528,7 +18974,7 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
             outReal[outIdx++] = (100.0*(prevMinusDM/prevTR)) ;
          else
             outReal[outIdx++] = 0.0;
@@ -18591,7 +19037,7 @@ public class Core {
             if( (diffM > 0) && (diffP < diffM) )
             {
                { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
-               if( (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+               if( (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
                   outReal[outIdx++] = (double)0.0;
                else
                   outReal[outIdx++] = diffM/tempReal;
@@ -18650,7 +19096,7 @@ public class Core {
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
       }
-      if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+      if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          outReal[0] = (100.0*(prevMinusDM/prevTR)) ;
       else
          outReal[0] = 0.0;
@@ -18675,7 +19121,7 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
             outReal[outIdx++] = (100.0*(prevMinusDM/prevTR)) ;
          else
             outReal[outIdx++] = 0.0;
@@ -19145,7 +19591,7 @@ public class Core {
       }
       outIdx = 1;
       tempValue = inClose[today];
-      if( ! (((-0.00000001)<tempValue)&&(tempValue<0.00000001)) )
+      if( ! (((- (0.00000000000001) )<tempValue)&&(tempValue< (0.00000000000001) )) )
          outReal[0] = (prevATR/tempValue)*100.0;
       else
          outReal[0] = 0.0;
@@ -19156,7 +19602,7 @@ public class Core {
          prevATR += tempBuffer[today++];
          prevATR /= optInTimePeriod;
          tempValue = inClose[today];
-         if( ! (((-0.00000001)<tempValue)&&(tempValue<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue)&&(tempValue< (0.00000000000001) )) )
             outReal[outIdx] = (prevATR/tempValue)*100.0;
          else
             outReal[0] = 0.0;
@@ -19235,7 +19681,7 @@ public class Core {
       }
       outIdx = 1;
       tempValue = inClose[today];
-      if( ! (((-0.00000001)<tempValue)&&(tempValue<0.00000001)) )
+      if( ! (((- (0.00000000000001) )<tempValue)&&(tempValue< (0.00000000000001) )) )
          outReal[0] = (prevATR/tempValue)*100.0;
       else
          outReal[0] = 0.0;
@@ -19246,7 +19692,7 @@ public class Core {
          prevATR += tempBuffer[today++];
          prevATR /= optInTimePeriod;
          tempValue = inClose[today];
-         if( ! (((-0.00000001)<tempValue)&&(tempValue<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue)&&(tempValue< (0.00000000000001) )) )
             outReal[outIdx] = (prevATR/tempValue)*100.0;
          else
             outReal[0] = 0.0;
@@ -19392,7 +19838,7 @@ public class Core {
             if( (diffP > 0) && (diffP > diffM) )
             {
                { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
-               if( (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+               if( (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
                   outReal[outIdx++] = (double)0.0;
                else
                   outReal[outIdx++] = diffP/tempReal;
@@ -19451,7 +19897,7 @@ public class Core {
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
       }
-      if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+      if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          outReal[0] = (100.0*(prevPlusDM/prevTR)) ;
       else
          outReal[0] = 0.0;
@@ -19476,7 +19922,7 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
             outReal[outIdx++] = (100.0*(prevPlusDM/prevTR)) ;
          else
             outReal[outIdx++] = 0.0;
@@ -19539,7 +19985,7 @@ public class Core {
             if( (diffP > 0) && (diffP > diffM) )
             {
                { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
-               if( (((-0.00000001)<tempReal)&&(tempReal<0.00000001)) )
+               if( (((- (0.00000000000001) )<tempReal)&&(tempReal< (0.00000000000001) )) )
                   outReal[outIdx++] = (double)0.0;
                else
                   outReal[outIdx++] = diffP/tempReal;
@@ -19598,7 +20044,7 @@ public class Core {
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
       }
-      if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+      if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
          outReal[0] = (100.0*(prevPlusDM/prevTR)) ;
       else
          outReal[0] = 0.0;
@@ -19623,7 +20069,7 @@ public class Core {
          { tempReal = prevHigh-prevLow; tempReal2 = Math.abs (prevHigh-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; tempReal2 = Math.abs (prevLow-prevClose); if( tempReal2 > tempReal ) tempReal = tempReal2; } ;
          prevTR = prevTR - (prevTR/optInTimePeriod) + tempReal;
          prevClose = inClose[today];
-         if( ! (((-0.00000001)<prevTR)&&(prevTR<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<prevTR)&&(prevTR< (0.00000000000001) )) )
             outReal[outIdx++] = (100.0*(prevPlusDM/prevTR)) ;
          else
             outReal[outIdx++] = 0.0;
@@ -20419,7 +20865,7 @@ public class Core {
          tempValue1 = prevLoss/optInTimePeriod;
          tempValue2 = prevGain/optInTimePeriod;
          tempValue1 = tempValue2+tempValue1;
-         if( ! (((-0.00000001)<tempValue1)&&(tempValue1<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue1)&&(tempValue1< (0.00000000000001) )) )
             outReal[outIdx++] = 100*(tempValue2/tempValue1);
          else
             outReal[outIdx++] = 0.0;
@@ -20450,7 +20896,7 @@ public class Core {
       if( today > startIdx )
       {
          tempValue1 = prevGain+prevLoss;
-         if( ! (((-0.00000001)<tempValue1)&&(tempValue1<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue1)&&(tempValue1< (0.00000000000001) )) )
             outReal[outIdx++] = 100.0*(prevGain/tempValue1);
          else
             outReal[outIdx++] = 0.0;
@@ -20487,7 +20933,7 @@ public class Core {
          prevLoss /= optInTimePeriod;
          prevGain /= optInTimePeriod;
          tempValue1 = prevGain+prevLoss;
-         if( ! (((-0.00000001)<tempValue1)&&(tempValue1<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue1)&&(tempValue1< (0.00000000000001) )) )
             outReal[outIdx++] = 100.0*(prevGain/tempValue1);
          else
             outReal[outIdx++] = 0.0;
@@ -20508,6 +20954,7 @@ public class Core {
       int today, lookbackTotal, unstablePeriod, i;
       double prevGain, prevLoss, prevValue, savePrevValue;
       double tempValue1, tempValue2;
+      int mmmixi, mmmixdestIdx, mmmixsrcIdx ;
       if( startIdx < 0 )
          return RetCode.OutOfRangeStartIndex ;
       if( (endIdx < 0) || (endIdx < startIdx))
@@ -20529,7 +20976,7 @@ public class Core {
          outBegIdx.value = startIdx;
          i = (endIdx-startIdx)+1;
          outNBElement.value = i;
-         System.arraycopy(inReal,startIdx,outReal,0,i) ;
+         { for( mmmixi=0, mmmixdestIdx=0, mmmixsrcIdx=startIdx; mmmixi < i; mmmixi++, mmmixdestIdx++, mmmixsrcIdx++ ) { outReal[mmmixdestIdx] = inReal[mmmixsrcIdx]; } } ;
          return RetCode.Success ;
       }
       today = startIdx-lookbackTotal;
@@ -20554,7 +21001,7 @@ public class Core {
          tempValue1 = prevLoss/optInTimePeriod;
          tempValue2 = prevGain/optInTimePeriod;
          tempValue1 = tempValue2+tempValue1;
-         if( ! (((-0.00000001)<tempValue1)&&(tempValue1<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue1)&&(tempValue1< (0.00000000000001) )) )
             outReal[outIdx++] = 100*(tempValue2/tempValue1);
          else
             outReal[outIdx++] = 0.0;
@@ -20585,7 +21032,7 @@ public class Core {
       if( today > startIdx )
       {
          tempValue1 = prevGain+prevLoss;
-         if( ! (((-0.00000001)<tempValue1)&&(tempValue1<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue1)&&(tempValue1< (0.00000000000001) )) )
             outReal[outIdx++] = 100.0*(prevGain/tempValue1);
          else
             outReal[outIdx++] = 0.0;
@@ -20622,7 +21069,7 @@ public class Core {
          prevLoss /= optInTimePeriod;
          prevGain /= optInTimePeriod;
          tempValue1 = prevGain+prevLoss;
-         if( ! (((-0.00000001)<tempValue1)&&(tempValue1<0.00000001)) )
+         if( ! (((- (0.00000000000001) )<tempValue1)&&(tempValue1< (0.00000000000001) )) )
             outReal[outIdx++] = 100.0*(prevGain/tempValue1);
          else
             outReal[outIdx++] = 0.0;
@@ -21747,7 +22194,7 @@ public class Core {
          for( i=0; i < (int) outNBElement.value ; i++ )
          {
             tempReal = outReal[i];
-            if( ! (tempReal<0.00000001) )
+            if( ! (tempReal< (0.00000000000001) ) )
                outReal[i] = Math.sqrt (tempReal) * optInNbDev;
             else
                outReal[i] = (double)0.0;
@@ -21758,7 +22205,7 @@ public class Core {
          for( i=0; i < (int) outNBElement.value ; i++ )
          {
             tempReal = outReal[i];
-            if( ! (tempReal<0.00000001) )
+            if( ! (tempReal< (0.00000000000001) ) )
                outReal[i] = Math.sqrt (tempReal);
             else
                outReal[i] = (double)0.0;
@@ -21797,7 +22244,7 @@ public class Core {
          tempReal = inMovAvg[outIdx];
          tempReal *= tempReal;
          meanValue2 -= tempReal;
-         if( ! (meanValue2<0.00000001) )
+         if( ! (meanValue2< (0.00000000000001) ) )
             output[outIdx] = Math.sqrt (meanValue2);
          else
             output[outIdx] = (double)0.0;
@@ -21837,7 +22284,7 @@ public class Core {
          for( i=0; i < (int) outNBElement.value ; i++ )
          {
             tempReal = outReal[i];
-            if( ! (tempReal<0.00000001) )
+            if( ! (tempReal< (0.00000000000001) ) )
                outReal[i] = Math.sqrt (tempReal) * optInNbDev;
             else
                outReal[i] = (double)0.0;
@@ -21848,7 +22295,7 @@ public class Core {
          for( i=0; i < (int) outNBElement.value ; i++ )
          {
             tempReal = outReal[i];
-            if( ! (tempReal<0.00000001) )
+            if( ! (tempReal< (0.00000000000001) ) )
                outReal[i] = Math.sqrt (tempReal);
             else
                outReal[i] = (double)0.0;
@@ -21887,7 +22334,7 @@ public class Core {
          tempReal = inMovAvg[outIdx];
          tempReal *= tempReal;
          meanValue2 -= tempReal;
-         if( ! (meanValue2<0.00000001) )
+         if( ! (meanValue2< (0.00000000000001) ) )
             output[outIdx] = Math.sqrt (meanValue2);
          else
             output[outIdx] = (double)0.0;
@@ -24133,9 +24580,9 @@ public class Core {
          b2Total += trueRange;
          b3Total += trueRange;
          output = 0.0;
-         if( ! (((-0.00000001)<b1Total)&&(b1Total<0.00000001)) ) output += 4.0*(a1Total/b1Total);
-         if( ! (((-0.00000001)<b2Total)&&(b2Total<0.00000001)) ) output += 2.0*(a2Total/b2Total);
-         if( ! (((-0.00000001)<b3Total)&&(b3Total<0.00000001)) ) output += a3Total/b3Total;
+         if( ! (((- (0.00000000000001) )<b1Total)&&(b1Total< (0.00000000000001) )) ) output += 4.0*(a1Total/b1Total);
+         if( ! (((- (0.00000000000001) )<b2Total)&&(b2Total< (0.00000000000001) )) ) output += 2.0*(a2Total/b2Total);
+         if( ! (((- (0.00000000000001) )<b3Total)&&(b3Total< (0.00000000000001) )) ) output += a3Total/b3Total;
          { tempLT = inLow[trailingIdx1]; tempHT = inHigh[trailingIdx1]; tempCY = inClose[trailingIdx1-1]; trueLow = (((tempLT) < (tempCY)) ? (tempLT) : (tempCY)) ; closeMinusTrueLow = inClose[trailingIdx1] - trueLow; trueRange = tempHT - tempLT; tempDouble = Math.abs ( tempCY - tempHT ); if( tempDouble > trueRange ) trueRange = tempDouble; tempDouble = Math.abs ( tempCY - tempLT ); if( tempDouble > trueRange ) trueRange = tempDouble; } ;
          a1Total -= closeMinusTrueLow;
          b1Total -= trueRange;
@@ -24242,9 +24689,9 @@ public class Core {
          b2Total += trueRange;
          b3Total += trueRange;
          output = 0.0;
-         if( ! (((-0.00000001)<b1Total)&&(b1Total<0.00000001)) ) output += 4.0*(a1Total/b1Total);
-         if( ! (((-0.00000001)<b2Total)&&(b2Total<0.00000001)) ) output += 2.0*(a2Total/b2Total);
-         if( ! (((-0.00000001)<b3Total)&&(b3Total<0.00000001)) ) output += a3Total/b3Total;
+         if( ! (((- (0.00000000000001) )<b1Total)&&(b1Total< (0.00000000000001) )) ) output += 4.0*(a1Total/b1Total);
+         if( ! (((- (0.00000000000001) )<b2Total)&&(b2Total< (0.00000000000001) )) ) output += 2.0*(a2Total/b2Total);
+         if( ! (((- (0.00000000000001) )<b3Total)&&(b3Total< (0.00000000000001) )) ) output += a3Total/b3Total;
          { tempLT = inLow[trailingIdx1]; tempHT = inHigh[trailingIdx1]; tempCY = inClose[trailingIdx1-1]; trueLow = (((tempLT) < (tempCY)) ? (tempLT) : (tempCY)) ; closeMinusTrueLow = inClose[trailingIdx1] - trueLow; trueRange = tempHT - tempLT; tempDouble = Math.abs ( tempCY - tempHT ); if( tempDouble > trueRange ) trueRange = tempDouble; tempDouble = Math.abs ( tempCY - tempLT ); if( tempDouble > trueRange ) trueRange = tempDouble; } ;
          a1Total -= closeMinusTrueLow;
          b1Total -= trueRange;
@@ -24770,6 +25217,7 @@ public class Core {
       int inIdx, outIdx, i, trailingIdx, divider;
       double periodSum, periodSub, tempReal, trailingValue;
       int lookbackTotal;
+      int mmmixi, mmmixdestIdx, mmmixsrcIdx ;
       if( startIdx < 0 )
          return RetCode.OutOfRangeStartIndex ;
       if( (endIdx < 0) || (endIdx < startIdx))
@@ -24791,7 +25239,7 @@ public class Core {
       {
          outBegIdx.value = startIdx;
          outNBElement.value = endIdx-startIdx+1;
-         System.arraycopy(inReal,startIdx,outReal,0,(int)outNBElement.value) ;
+         { for( mmmixi=0, mmmixdestIdx=0, mmmixsrcIdx=startIdx; mmmixi < (int) outNBElement.value ; mmmixi++, mmmixdestIdx++, mmmixsrcIdx++ ) { outReal[mmmixdestIdx] = inReal[mmmixsrcIdx]; } } ;
          return RetCode.Success ;
       }
       divider = (optInTimePeriod*(optInTimePeriod+1))>>1;
